@@ -35,10 +35,10 @@ if __name__ == "__main__":
 
 
     #Main arguments:
-    e_cut = 500
+    e_cut = 600
     nbands = -50
     xc = 'PBE'
-    k_pts = 3
+    k_pts = 10
     smear = 0.1
     system_id = int((sys.argv[1]))
     system_name = 'fesi_8atoms_id' + str(system_id)
@@ -56,7 +56,7 @@ if __name__ == "__main__":
         traj = Trajectory(system_name + '.traj')
         bulk_mat = traj[-1]
         bulk_mat.set_calculator(calc)
-        
+
 
     else:
         #Initialize new calculations
@@ -81,10 +81,10 @@ if __name__ == "__main__":
 
         bulk_mat.set_calculator(calc)
 
-    #Get atoms for initial saving purpose
+    #Get atoms for initial saving purposes
     db_initial = connect(str(sys.argv[2]))
     bulk_mat_initial = db_initial.get_atoms(id = system_id)
-    #Get number of si and magmom for saving purpose
+    #Get number of si and magmom for saving purposes
     number_of_atoms = bulk_mat.get_number_of_atoms()
     number_of_si = 0
     initial_magmom = 0

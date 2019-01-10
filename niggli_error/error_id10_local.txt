@@ -1,0 +1,34 @@
+Traceback (most recent call last):
+  File "fesi_relax_8atoms.py", line 115, in <module>
+    relaxer.run(fmax = 0.025)
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/ase/optimize/optimize.py", line 202, in run
+    for converged in self.irun(fmax, steps):
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/ase/optimize/optimize.py", line 179, in irun
+    f = self.atoms.get_forces()
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/ase/constraints.py", line 1512, in get_forces
+    atoms_forces = self.atoms.get_forces()
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/ase/atoms.py", line 714, in get_forces
+    forces = self._calc.get_forces(self)
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/ase/calculators/calculator.py", line 519, in get_forces
+    return self.get_property('forces', atoms)
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/ase/calculators/calculator.py", line 552, in get_property
+    self.calculate(atoms, [name], system_changes)
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/gpaw/calculator.py", line 278, in calculate
+    self.initialize(atoms)
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/gpaw/calculator.py", line 650, in initialize
+    cell_cv, pbc_c)
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/gpaw/calculator.py", line 1063, in create_wave_functions
+    **wfs_kwargs)
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/gpaw/wavefunctions/pw.py", line 90, in __call__
+    **kwargs)
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/gpaw/wavefunctions/pw.py", line 531, in __init__
+    kptband_comm=kptband_comm, timer=timer)
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/gpaw/wavefunctions/fdpw.py", line 175, in __init__
+    WaveFunctions.__init__(self, **kwargs)
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/gpaw/wavefunctions/base.py", line 59, in __init__
+    self.set_setups(setups)
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/gpaw/wavefunctions/pw.py", line 549, in set_setups
+    self.fftwflags)
+  File "/home/rasmus/anaconda3/lib/python3.6/site-packages/gpaw/wavefunctions/pw.py", line 128, in __init__
+    'You have a weird unit cell!  '
+ValueError: You have a weird unit cell!  Try to use the maximally reduced Niggli cell.  See the ase.build.niggli_reduce() function.
