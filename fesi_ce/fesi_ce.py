@@ -59,7 +59,7 @@ def insert_experimental_fesi_structure(struct_gen):
     init_structure = read('initial.xyz')
     final_structure = read('final.xyz')
 
-    calc = SinglePointCalculator(final_structure, energy=-241.049)
+    calc = SinglePointCalculator(final_structure, energy=-135.839)
     final_structure.set_calculator(calc)
     struct_gen.insert_structure(init_struct=init_structure, final_struct=final_structure, generate_template=True)
 
@@ -71,8 +71,8 @@ def create_xyz():
 
     db = connect('FeSi_8atoms.db')
 
-    initial = db.get_atoms(id=29)
-    final = db.get_atoms(id=30)
+    initial = db.get_atoms(id=41)
+    final = db.get_atoms(id=42)
 
     initial.write('initial.xyz')
     final.write('final.xyz')
