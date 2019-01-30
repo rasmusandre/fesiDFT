@@ -12,11 +12,11 @@ def main():
     max_cluster_size=4, size=[2,2,2],
     max_cluster_dia=[0.0, 10, 10, 7.5, 5.5], concentration=conc, cubic=True)
     #print(ceBulk.cluster_info_given_size(4))
-    ceBulk.reconfigure_settings()
+    #ceBulk.reconfigure_settings()
     #ceBulk.view_clusters()
     struct_generator = NewStructures(ceBulk, struct_per_gen=10)
 
-    reconfigure(ceBulk)
+    #reconfigure(ceBulk)
     evaluate(ceBulk)
     #insert_experimental_fesi_structure(struct_generator)
 
@@ -72,7 +72,7 @@ def evaluate_L2(ceBulk):
     #compressive = BayesianCompressiveSensing(noise=0.1)
     #evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-8,
     #scoring_scheme="loocv_fast", cluster_names=names)
-    evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-6,
+    evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-3,
     scoring_scheme="loocv_fast")
     #evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False,
     #scoring_scheme="loocv_fast")
@@ -94,7 +94,7 @@ def insert_experimental_fesi_structure(struct_gen):
     init_structure = read('initial.xyz')
     final_structure = read('final.xyz')
 
-    calc = SinglePointCalculator(final_structure, energy=-105.914)
+    calc = SinglePointCalculator(final_structure, energy=-198.011)
     final_structure.set_calculator(calc)
     struct_gen.insert_structure(init_struct=init_structure, final_struct=final_structure, generate_template=True)
 
@@ -104,16 +104,38 @@ def create_xyz():
     from ase.db import connect
     from ase.io import write
 
-    db = connect('FeSi_16atoms.db')
+    db = connect('FeSi_8atoms.db')
 
-    initial = db.get_atoms(id=15)
-    final = db.get_atoms(id=16)
+    initial = db.get_atoms(id=61)
+    final = db.get_atoms(id=62)
 
     initial.write('initial.xyz')
     final.write('final.xyz')
 
+def sym_check():
 
+    from ase.utils.structure_comparator import SymmetryEquivalenceCheck
+
+    from ase.db import connect
+
+    db1 = connect('FeSi_8atoms.db')
+    db2 = connect('FeSi_8atoms_12finished.db')
+
+    init = db1.get_atoms(id=61)
+    ids = []
+    for k in db2.select():
+        ids.append(k.id)
+
+    for id in ids:
+
+        fin_12 = db2.get_atoms(id=id)
+        symcheck = SymmetryEquivalenceCheck()
+
+        if (symcheck.compare(init,fin_12)):
+
+            print(id)
 
 #create_xyz()
-#main()
-convex_hull()
+#sym_check()
+main()
+#convex_hull()
