@@ -20,20 +20,25 @@ def prepare_structures():
 
 def prepare_random_structure():
 
-    num_fe = randint(0,27)
-    num_si = 27 - num_fe
+    num_fe = 0
+    num_si = 10
+
+    while num_si/(num_si + num_fe) > 0.75:
+        num_fe = randint(0,27)
+        num_si = 27 - num_fe
 
     return [num_fe, num_si]
 
 def prepare_random_structures():
 
 
-    db = connect('FeSi_27atoms_initial.db')
+    db = connect('FeSi_27atoms_initial_v2.db')
     added_to_db = 0
 
-    while added_to_db < 10:
+    while added_to_db < 1000:
         atoms = bulk('Fe', 'bcc', a = 2.876)*(3,3,3)
         atom_config = prepare_random_structure()
+
         num_si = 0
         while num_si < atom_config[1]:
             for atom in atoms:
@@ -42,33 +47,33 @@ def prepare_random_structures():
                     num_si += 1
 
 
-        if not exists_in_db(atoms):
+        if not exists_in_db(atoms, 'FeSi_27_atoms_initial_v2.db' ) and not exists_in_db(atoms, 'FeSi_27atoms_initial.db') and not exists_in_db(atoms, 'FeSi_16_atoms_initial.db') and not exists_in_db(atoms, 'FeSi_8atoms_initial.db'):
             db.write(atoms, struct_type = 'initial')
             added_to_db += 1
 
-    added_to_db = 0
-    while added_to_db < 20:
+    # added_to_db = 0
+    # while added_to_db < 20:
+    #
+    #     atoms = bulk('Fe', 'bcc', a = 2.876)*(3,3,3)
+    #     max_si = randint(13,14)
+    #     print(max_si)
+    #     num_si = 0
+    #     while num_si < max_si:
+    #
+    #         for atom in atoms:
+    #             if atom.symbol != 'Si' and randint(0,10)/10 <= 0.5 and num_si < max_si:
+    #                 atom.symbol = 'Si'
+    #                 num_si += 1
+    #
+    #     if not exists_in_db(atoms):
+    #         db.write(atoms, struct_type = 'initial')
+    #         added_to_db += 1
 
-        atoms = bulk('Fe', 'bcc', a = 2.876)*(3,3,3)
-        max_si = randint(13,14)
-        print(max_si)
-        num_si = 0
-        while num_si < max_si:
+def exists_in_db(a, db_name):
 
-            for atom in atoms:
-                if atom.symbol != 'Si' and randint(0,10)/10 <= 0.5 and num_si < max_si:
-                    atom.symbol = 'Si'
-                    num_si += 1
-
-        if not exists_in_db(atoms):
-            db.write(atoms, struct_type = 'initial')
-            added_to_db += 1
-
-def exists_in_db(a):
-
-    db = connect('FeSi_27atoms_initial.db')
+    db = connect(db_name)
     atoms = []
-
+    print('Checking database ' + db_name)
     for row in db.select(struct_type = 'initial'):
 
         atoms.append(row.toatoms())

@@ -17,7 +17,7 @@ def main():
     struct_generator = NewStructures(ceBulk, struct_per_gen=10)
 
     #reconfigure(ceBulk)
-    evaluate(ceBulk)
+    evaluate_GA(ceBulk)
     #insert_experimental_fesi_structure(struct_generator)
 
 def reconfigure(ceBulk):
@@ -30,15 +30,16 @@ def reconfigure(ceBulk):
 def evaluate(ceBulk):
 
     from ase.clease import GAFit, Evaluate
-    #ga = GAFit(setting=ceBulk, alpha=1E-8, mutation_prob=0.01, num_individuals="auto",
-    #change_prob=0.2, fname="ga_fesi.csv", max_cluster_dia=6)
-    #names = ga.run(min_change=0.001, gen_without_change=100)
+    # ga = GAFit(setting=ceBulk, alpha=1E-8, mutation_prob=0.01, num_individuals="auto",
+    # change_prob=0.2, fname="ga_fesi.csv", max_cluster_dia=6)
+    # names = ga.run(min_change=0.001, gen_without_change=100)
+
     with open("ga_fesi_cluster_names.txt", 'r') as infile:
         lines = infile.readlines()
     names = [x.strip() for x in lines]
     #compressive = BayesianCompressiveSensing(noise=0.1)
-    #evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-8,
-    #scoring_scheme="loocv_fast", cluster_names=names)
+    # evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-8,
+    # scoring_scheme="loocv_fast", cluster_names=names)
     evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-1,
     scoring_scheme="loocv_fast", max_cluster_dia=6, max_cluster_size=2)
     #evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False,
@@ -60,26 +61,23 @@ def convex_hull():
     ch.plot()
     plt.show()
 
-def evaluate_L2(ceBulk):
+def evaluate_GA(ceBulk):
 
-    from ase.clease import GAFit, Evaluate, LinearRegression
-    #ga = GAFit(setting=ceBulk, alpha=1E-8, mutation_prob=0.01, num_individuals="auto",
-    #change_prob=0.2, fname="ga_fesi.csv", max_cluster_dia=6)
-    #names = ga.run(min_change=0.001, gen_without_change=100)
+    from ase.clease import GAFit, Evaluate
+    ga = GAFit(setting=ceBulk, alpha=1E-8, mutation_prob=0.01, num_individuals="auto",
+    fname="ga_fesi.csv", max_cluster_dia=6)
+    names = ga.run(min_change=0.001, gen_without_change=100)
+
     with open("ga_fesi_cluster_names.txt", 'r') as infile:
         lines = infile.readlines()
     names = [x.strip() for x in lines]
-    #compressive = BayesianCompressiveSensing(noise=0.1)
-    #evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-8,
-    #scoring_scheme="loocv_fast", cluster_names=names)
-    evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-3,
-    scoring_scheme="loocv_fast")
+
+    evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-8,
+    scoring_scheme="loocv_fast", cluster_names=names)
+
     #evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False,
     #scoring_scheme="loocv_fast")
-    #x = evaluator.cf_matrix
-    #k = x.T.dot(x)
-    #print(k.shape)
-    #print(np.linalg.matrix_rank(x.T.dot(x)))
+
     evaluator.plot_fit(interactive=True)
     eci_names = evaluator.get_cluster_name_eci(return_type="dict")
 
