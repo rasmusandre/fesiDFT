@@ -44,7 +44,7 @@ def get_energies():
 
 def get_ids():
 
-    db = connect('FeSi_8atoms.db')
+    db = connect('FeSi_8atoms_12finished.db')
 
     ids = []
     final_ids = []
@@ -53,17 +53,19 @@ def get_ids():
 
         if 'energy' in obj:
             ids.append(obj['id'])
+            print(obj['formula'])
 
     return ids
 
 def plot_lattice_const():
 
-    db = connect('FeSi_8atoms.db')
+    db = connect('FeSi_8atoms_12finished.db')
 
     lattice_const = []
     mag_mom = []
     si_conc = []
     ids = get_ids()
+    plt.figure(2)
 
     for id in ids:
 
@@ -82,24 +84,32 @@ def plot_lattice_const():
 
         si_conc.append(num_si/(num_si+num_fe))
 
-        print(bulk.get_cell())
-        print('----------')
-        for obj in db.select(id=id):
-            mag_val = obj['magmom']/(num_si+num_fe)
+        #print(bulk.get_cell())
+        #print('----------')
+        #for obj in db.select(id=id):
+            #mag_val = obj['magmom']/(num_si+num_fe)
         #mag_val = bulk.get_magnetic_moment()
-        mag_mom.append(mag_val)
-        #val = (bulk.get_cell()[0][0]**2 + bulk.get_cell()[0][1]**2  + bulk.get_cell()[0][2]**2)**0.5
-        val = 0.5*(2*bulk.get_volume())**(1/3)
+        #mag_mom.append(mag_val)
+        num_atoms = num_si+num_fe
+        if num_atoms==27:
+            val = (1/3)*(2*bulk.get_volume())**(1/3)
+            plt.plot(num_si/num_atoms, val, 'ro')
+        if num_atoms==16:
+            val = (1/2)*(2*bulk.get_volume())**(1/3)
+            plt.plot(num_si/num_atoms, val, 'bo')
+        if num_atoms==8:
+            val = (2/5)*(2*bulk.get_volume())**(1/3)
+            plt.plot(num_si/num_atoms, val, 'go')
         lattice_const.append(val)
 
     si_conc2 = si_conc
-    si_conc2, mag_mom = (list(t) for t in zip(*sorted(zip(si_conc2, mag_mom))))
+    #si_conc2, mag_mom = (list(t) for t in zip(*sorted(zip(si_conc2, mag_mom))))
     si_conc, lattice_const = (list(t) for t in zip(*sorted(zip(si_conc, lattice_const))))
     plt.figure(0)
     plt.plot(si_conc, lattice_const,'o')
-    plt.figure(1)
-    plt.plot(si_conc2, mag_mom, 'o')
-    plt.plot([0,1],[mag_mom[0],mag_mom[-1]],'r')
+    #plt.figure(1)
+    #plt.plot(si_conc2, mag_mom, 'o')
+    #plt.plot([0,1],[mag_mom[0],mag_mom[-1]],'r')
     plt.xlabel('X(Si)')
     plt.ylabel('Magnetic moment per atom')
     plt.show()
@@ -146,6 +156,12 @@ def brute_force():
     plt.show()
 
 plot_lattice_const()
+k = 2
+mat = bulk('Fe','bcc',a=2.86)*(2,2,4)
+#view(mat)
+print(mat.get_volume())
+lc = (2*mat.get_volume())**(1/3)
+print(lc)
 
 
 
