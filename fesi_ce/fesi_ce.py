@@ -16,7 +16,7 @@ def main():
     #ceBulk.view_clusters()
     struct_generator = NewStructures(ceBulk, struct_per_gen=10)
 
-    #econfigure(ceBulk)
+    reconfigure(ceBulk)
     evaluate(ceBulk)
     #insert_experimental_fesi_structure(struct_generator)
 
@@ -92,7 +92,7 @@ def insert_experimental_fesi_structure(struct_gen):
     init_structure = read('initial.xyz')
     final_structure = read('final.xyz')
 
-    calc = SinglePointCalculator(final_structure, energy=-108.763)
+    calc = SinglePointCalculator(final_structure, energy=-78.268)
     final_structure.set_calculator(calc)
     struct_gen.insert_structure(init_struct=init_structure, final_struct=final_structure, generate_template=True)
 
@@ -102,10 +102,10 @@ def create_xyz():
     from ase.db import connect
     from ase.io import write
 
-    db = connect('FeSi_16atoms.db')
+    db = connect('FeSi_8atoms_12finished_v2.db')
 
-    initial = db.get_atoms(id=23)
-    final = db.get_atoms(id=24)
+    initial = db.get_atoms(id=132)
+    final = db.get_atoms(id=154)
 
     initial.write('initial.xyz')
     final.write('final.xyz')
