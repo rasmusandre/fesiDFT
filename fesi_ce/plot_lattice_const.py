@@ -100,6 +100,7 @@ def plot_lattice_const():
         if num_atoms==8:
             val = (2/5)*(2*bulk.get_volume())**(1/3)
             plt.plot(num_si/num_atoms, val, 'go')
+        
         lattice_const.append(val)
 
     si_conc2 = si_conc

@@ -23,3 +23,26 @@ rerun 120, 123, 125, 126, 132 with kpts 5.4
 112, 113, 114, 116, 117, 118, 119, 121, 122, 124, 127 crashed
 5/2: 115, 120, 123 done
 5/2: rerun 133, 134, 135, 130
+
+6/2:
+old 27: running:7 done:19, 7 is rerun
+old 16: running: 5,6 rerun (6/2)
+
+new 27:
+crash: 1,5,8,12
+done: 2,3,9,10,14
+running: 4,6,16,17,19,20
+done change k: 7,11,13,15,18 (rerun 6/2)
+rerun 17, 20
+first run of 21-25, (812-816)
+rerun 23 kpts 5.4
+rerun new kpts 17, 6
+
+small_structures:
+crash: 112,113,114,116,117,118,119,121,122,124,127,131
+done: 115, 120,123,125,126,130,132,133,134,135
+done change k: 128, 129, (rerun 6/2)
+also run (6/2): 136-145 (237-246)
+also new run (6/2): 146-149 (899-903)
+rerun 144, 145 with kpts=5.4
+rerun 141, 142 with kpts=5.4
