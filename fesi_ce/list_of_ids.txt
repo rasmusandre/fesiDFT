@@ -46,3 +46,24 @@ also run (6/2): 136-145 (237-246)
 also new run (6/2): 146-149 (899-903)
 rerun 144, 145 with kpts=5.4
 rerun 141, 142 with kpts=5.4
+
+7/2:
+
+27 old: 7 is running
+16 old: 5 is running
+
+27 new:
+
+crash: 1,5,8,12,21
+done: 2,3,9,10,14,16,18,19
+rerun 20 with kpts=5.4
+
+small_structures:
+
+crash: 112,113,114,116,117,118,119,121,122,124,127,131,136,137,138,139,140,146,148
+done: 115,120,123,125,126,128,130,132,133,134,135,144
+rerun: 141, 142, 145, 147, 149
+
+small_structures_cubic:
+
+first run: 166-176 (099-104),(113-116)

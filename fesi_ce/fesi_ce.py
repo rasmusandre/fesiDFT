@@ -15,7 +15,7 @@ def main():
     #ceBulk.reconfigure_settings()
     #ceBulk.view_clusters()
     struct_generator = NewStructures(ceBulk, struct_per_gen=10)
-
+    #print(ceBulk.basis_functions)
     #reconfigure(ceBulk)
     evaluate(ceBulk)
     #insert_experimental_fesi_structure(struct_generator)
@@ -34,14 +34,20 @@ def evaluate(ceBulk):
     # change_prob=0.2, fname="ga_fesi.csv", max_cluster_dia=6)
     # names = ga.run(min_change=0.001, gen_without_change=100)
 
+    scond = [('converged','=',1), ('c1_0', '>', -0.1), ('group','<',3)] #(group, =, 0)
+
+
+
     with open("ga_fesi_cluster_names.txt", 'r') as infile:
         lines = infile.readlines()
     names = [x.strip() for x in lines]
     #compressive = BayesianCompressiveSensing(noise=0.1)
     # evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-8,
     # scoring_scheme="loocv_fast", cluster_names=names)
-    evaluator = Evaluate(ceBulk, fitting_scheme="l1", parallel=False, alpha=1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=8, max_cluster_size=3)
+    evaluator = Evaluate(ceBulk, fitting_scheme="l1", parallel=False, alpha=0.2*1E-4,
+    scoring_scheme="loocv_fast", max_cluster_dia=3, max_cluster_size=2, select_cond=scond)
+    #evaluator.plot_CV()
+    #for group<3 alpha 0.2*1E-4
     #for l2, alpha=1E-2, max_dia=5, max_size=3
     #evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False,
     #scoring_scheme="loocv_fast")
@@ -93,7 +99,7 @@ def insert_experimental_fesi_structure(struct_gen):
     init_structure = read('initial.xyz')
     final_structure = read('final.xyz')
 
-    calc = SinglePointCalculator(final_structure, energy=-68.759)
+    calc = SinglePointCalculator(final_structure, energy=-190.348)
     final_structure.set_calculator(calc)
     struct_gen.insert_structure(init_struct=init_structure, final_struct=final_structure, generate_template=True)
 
@@ -103,10 +109,10 @@ def create_xyz():
     from ase.db import connect
     from ase.io import write
 
-    db = connect('FeSi_8atoms_12finished_v2.db')
+    db = connect('FeSi_27atoms_final.db')
 
-    initial = db.get_atoms(id=145)
-    final = db.get_atoms(id=160)
+    initial = db.get_atoms(id=15)
+    final = db.get_atoms(id=16)
 
     initial.write('initial.xyz')
     final.write('final.xyz')
