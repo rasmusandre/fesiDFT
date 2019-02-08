@@ -4,6 +4,7 @@ from ase.clease import NewStructures
 from ase.clease import BayesianCompressiveSensing
 import numpy as np
 import json
+import time
 
 def main():
 
@@ -34,7 +35,7 @@ def evaluate(ceBulk):
     # change_prob=0.2, fname="ga_fesi.csv", max_cluster_dia=6)
     # names = ga.run(min_change=0.001, gen_without_change=100)
 
-    scond = [('converged','=',1), ('c1_0', '>', -0.1), ('group','<',3)] #(group, =, 0)
+    scond = [('converged','=',1), ('c1_0', '>', -0.1)]#, ('group','<',4)] #(group, =, 0)
 
 
 
@@ -44,8 +45,8 @@ def evaluate(ceBulk):
     #compressive = BayesianCompressiveSensing(noise=0.1)
     # evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-8,
     # scoring_scheme="loocv_fast", cluster_names=names)
-    evaluator = Evaluate(ceBulk, fitting_scheme="l1", parallel=False, alpha=0.2*1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=3, max_cluster_size=2, select_cond=scond)
+    evaluator = Evaluate(ceBulk, fitting_scheme="l1", parallel=False, alpha=0.1*1E-4,
+    scoring_scheme="loocv_fast", max_cluster_dia=5, max_cluster_size=2, select_cond=scond)
     #evaluator.plot_CV()
     #for group<3 alpha 0.2*1E-4
     #for l2, alpha=1E-2, max_dia=5, max_size=3
@@ -91,7 +92,7 @@ def evaluate_GA(ceBulk):
     with open(eci_fname,'w') as outfile:
         json.dump(eci_name, outfile, indent=2, separators=(",",":"))
 
-def insert_experimental_fesi_structure(struct_gen):
+def insert_experimental_fesi_structure(struct_gen, struct_energy):
 
     from ase.calculators.singlepoint import SinglePointCalculator
     from ase.io import read
@@ -99,23 +100,78 @@ def insert_experimental_fesi_structure(struct_gen):
     init_structure = read('initial.xyz')
     final_structure = read('final.xyz')
 
-    calc = SinglePointCalculator(final_structure, energy=-190.348)
+    calc = SinglePointCalculator(final_structure, energy=struct_energy)
     final_structure.set_calculator(calc)
     struct_gen.insert_structure(init_struct=init_structure, final_struct=final_structure, generate_template=True)
 
 
-def create_xyz():
+def create_xyz(database_name, initial_id, final_id):
 
     from ase.db import connect
     from ase.io import write
 
-    db = connect('FeSi_27atoms_final.db')
+    db = connect(database_name)
 
-    initial = db.get_atoms(id=15)
-    final = db.get_atoms(id=16)
+    initial = db.get_atoms(id=initial_id)
+    final = db.get_atoms(id=final_id)
 
     initial.write('initial.xyz')
     final.write('final.xyz')
+
+def insert_structures():
+
+    database = 'FeSi_8atoms_12finished_cubic.db'
+    #structure_ids = [(166,200,-15.324), (170,201,-30.649), (167,202,-33.294), (169,203,-30.178),
+    #(174,204,-44.978), (175,205,-39.996), (177,206,-48.644), (173,207,-43.319), (172,208,-48.201), (168,209,-25.080)]
+    structure_ids = [(169,203,-30.178)]
+    #from ase.db import connect
+    #from ase.io import write
+    #db = connect('FeSi_8atoms_12finished.db')
+    #del db[179]
+    #del db[180]
+    for data in structure_ids:
+        create_xyz(database, data[0], data[1])
+
+
+        conc = Concentration(basis_elements=[['Fe','Si']])
+        ceBulk = CEBulk(crystalstructure='bcc', a=2.876, db_name='FeSi_8atoms_12finished.db',
+        max_cluster_size=4, size=[2,2,2],
+        max_cluster_dia=[0.0, 10, 10, 7.5, 5.5], concentration=conc, cubic=True)
+
+        struct_generator = NewStructures(ceBulk, struct_per_gen=10)
+
+        #insert_experimental_fesi_structure(struct_generator, data[2])
+
+def create_db_organize():
+    #create CE db from FeSi_8atoms and FeSi_16atoms
+    from ase.db import connect
+    from ase.io import write
+
+    db_name = 'FeSi_16atoms.db'
+    db = connect(db_name)
+    start_id = 1
+    end_id = 4
+
+    conc = Concentration(basis_elements=[['Fe','Si']])
+    ceBulk = CEBulk(crystalstructure='bcc', a=2.876, db_name='FeSi_test.db',
+    max_cluster_size=4, size=[2,2,2],
+    max_cluster_dia=[0.0, 10, 10, 7.5, 5.5], concentration=conc, cubic=True)
+    ceBulk.reconfigure_settings()
+
+    struct_generator = NewStructures(ceBulk, struct_per_gen=10)
+
+
+    while start_id < end_id + 1:
+        local_end_id = start_id + 1
+
+        for obj in db.select(id=local_end_id):
+
+            energy = obj['energy']
+        print((start_id, local_end_id))
+        create_xyz(db_name, start_id, local_end_id)
+        insert_experimental_fesi_structure(struct_generator, energy)
+        start_id += 2
+
 
 def sym_check():
 
@@ -140,6 +196,8 @@ def sym_check():
 
             print(id)
 
+#create_db_organize()
+#insert_structures()
 #create_xyz()
 #sym_check()
 main()
