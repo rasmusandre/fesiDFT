@@ -18,7 +18,7 @@ def main():
     struct_generator = NewStructures(ceBulk, struct_per_gen=10)
     #print(ceBulk.basis_functions)
     #reconfigure(ceBulk)
-    evaluate(ceBulk)
+    evaluate_GA(ceBulk)
     #insert_experimental_fesi_structure(struct_generator)
 
 def reconfigure(ceBulk):
@@ -35,7 +35,7 @@ def evaluate(ceBulk):
     # change_prob=0.2, fname="ga_fesi.csv", max_cluster_dia=6)
     # names = ga.run(min_change=0.001, gen_without_change=100)
 
-    scond = [('converged','=',1), ('c1_0', '>', -0.1)]#, ('group','<',4)] #(group, =, 0)
+    scond = [('converged','=',1), ('c1_0', '>', -0.4)]#, ('id','!=',15), ('id', '!=',16)]#, ('group','<',4), ('id','!=',15), ('id', '!=',16)] #(group, =, 0)
 
 
 
@@ -45,18 +45,21 @@ def evaluate(ceBulk):
     #compressive = BayesianCompressiveSensing(noise=0.1)
     # evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-8,
     # scoring_scheme="loocv_fast", cluster_names=names)
-    evaluator = Evaluate(ceBulk, fitting_scheme="l1", parallel=False, alpha=0.1*1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=5, max_cluster_size=2, select_cond=scond)
-    #evaluator.plot_CV()
+    evaluator = Evaluate(ceBulk, fitting_scheme="l1", parallel=False, alpha=1.3*1E-4,
+    scoring_scheme="loocv_fast", max_cluster_dia=5, max_cluster_size=4, select_cond=scond)
+    evaluator.plot_CV()
+    #for c1_0 >-0.4, alpha=1.3E-4, dia=5, size=4
     #for group<3 alpha 0.2*1E-4
     #for l2, alpha=1E-2, max_dia=5, max_size=3
+    #for group=0, alpha=1.3E-4, dia=6, size=4
+    #for group=0,1, alpha=4.6E-4, dia=6, size=3
     #evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False,
     #scoring_scheme="loocv_fast")
     #x = evaluator.cf_matrix
     #k = x.T.dot(x)
     #print(k.shape)
     #print(np.linalg.matrix_rank(x.T.dot(x)))
-    evaluator.plot_fit(interactive=True)
+    evaluator.plot_fit(interactive=False)
     eci_names = evaluator.get_cluster_name_eci(return_type="dict")
 
     with open(eci_fname,'w') as outfile:
@@ -72,16 +75,22 @@ def convex_hull():
 def evaluate_GA(ceBulk):
 
     from ase.clease import GAFit, Evaluate
+
+    scond = [('converged','=',1)], ('c1_0', '>', -0.4)]
+
     ga = GAFit(setting=ceBulk, alpha=1E-8, mutation_prob=0.01, num_individuals="auto",
-    fname="ga_fesi.csv", max_cluster_dia=6)
+    fname="ga_fesi.csv", max_cluster_dia=6, include_subclusters=False, select_cond=scond)
+    #ga = GAFit(setting=ceBulk, parallel=True)
     names = ga.run(min_change=0.001, gen_without_change=100)
 
     with open("ga_fesi_cluster_names.txt", 'r') as infile:
         lines = infile.readlines()
     names = [x.strip() for x in lines]
 
-    evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-8,
-    scoring_scheme="loocv_fast", cluster_names=names)
+    #scond = [('converged','=',1), ('c1_0', '>', -0.4)]#, ('id','!=',15), ('id', '!=',16)]
+
+    evaluator = Evaluate(ceBulk, cluster_names=names, fitting_scheme="l1", parallel=False, alpha=1.3*1E-4,
+    scoring_scheme="loocv_fast", max_cluster_dia=5, max_cluster_size=4, select_cond=scond)
 
     #evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False,
     #scoring_scheme="loocv_fast")
