@@ -47,7 +47,7 @@ def evaluate(ceBulk):
     # scoring_scheme="loocv_fast", cluster_names=names)
     evaluator = Evaluate(ceBulk, fitting_scheme="l1", parallel=False, alpha=1.3*1E-4,
     scoring_scheme="loocv_fast", max_cluster_dia=5, max_cluster_size=4, select_cond=scond)
-    evaluator.plot_CV()
+    #evaluator.plot_CV()
     #for c1_0 >-0.4, alpha=1.3E-4, dia=5, size=4
     #for group<3 alpha 0.2*1E-4
     #for l2, alpha=1E-2, max_dia=5, max_size=3
@@ -76,12 +76,12 @@ def evaluate_GA(ceBulk):
 
     from ase.clease import GAFit, Evaluate
 
-    scond = [('converged','=',1)], ('c1_0', '>', -0.4)]
+    scond = [('converged','=',1), ('c1_0', '>', -0.4)]#, ('group', '<=', 2)]
 
-    ga = GAFit(setting=ceBulk, alpha=1E-8, mutation_prob=0.01, num_individuals="auto",
-    fname="ga_fesi.csv", max_cluster_dia=6, include_subclusters=False, select_cond=scond)
-    #ga = GAFit(setting=ceBulk, parallel=True)
-    names = ga.run(min_change=0.001, gen_without_change=100)
+    #ga = GAFit(setting=ceBulk, alpha=1E-8, mutation_prob=0.01, num_individuals="auto",
+    #fname="ga_fesi.csv", max_cluster_dia=6, include_subclusters=False, select_cond=scond)
+
+    #names = ga.run(min_change=0.001, gen_without_change=100)
 
     with open("ga_fesi_cluster_names.txt", 'r') as infile:
         lines = infile.readlines()
@@ -90,8 +90,9 @@ def evaluate_GA(ceBulk):
     #scond = [('converged','=',1), ('c1_0', '>', -0.4)]#, ('id','!=',15), ('id', '!=',16)]
 
     evaluator = Evaluate(ceBulk, cluster_names=names, fitting_scheme="l1", parallel=False, alpha=1.3*1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=5, max_cluster_size=4, select_cond=scond)
-
+    scoring_scheme="loocv_fast", max_cluster_dia=6, max_cluster_size=5, select_cond=scond)
+    #for all: 1.3E-4,5,4
+    #evaluator.plot_CV()
     #evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False,
     #scoring_scheme="loocv_fast")
 
@@ -132,7 +133,8 @@ def insert_structures():
     database = 'FeSi_8atoms_12finished_cubic.db'
     #structure_ids = [(166,200,-15.324), (170,201,-30.649), (167,202,-33.294), (169,203,-30.178),
     #(174,204,-44.978), (175,205,-39.996), (177,206,-48.644), (173,207,-43.319), (172,208,-48.201), (168,209,-25.080)]
-    structure_ids = [(169,203,-30.178)]
+    #structure_ids = [(169,203,-30.178)]
+    structure_ids = [(176,210,-40.408),(177,211,-40.505),(178,212,-48.305),(179,215,-51.335),(180,213,-45.974),(184,214,-60.355)]
     #from ase.db import connect
     #from ase.io import write
     #db = connect('FeSi_8atoms_12finished.db')
@@ -149,7 +151,7 @@ def insert_structures():
 
         struct_generator = NewStructures(ceBulk, struct_per_gen=10)
 
-        #insert_experimental_fesi_structure(struct_generator, data[2])
+        insert_experimental_fesi_structure(struct_generator, data[2])
 
 def create_db_organize():
     #create CE db from FeSi_8atoms and FeSi_16atoms
@@ -205,6 +207,44 @@ def sym_check():
 
             print(id)
 
+def check_databases():
+    from ase.db import connect
+    db1 = connect('FeSi_8atoms.db')
+    db2 = connect('FeSi_16atoms.db')
+    db3 = connect('FeSi_8atoms_12finished_v2.db')
+    db4 = connect('FeSi_8atoms_12finished_cubic.db')
+    db5 = connect('FeSi_27atoms_final.db')
+    db_ce = connect('FeSi_8atoms_12finished.db')
+
+    num_ids = 0
+
+    for obj in db_ce.select(struct_type='final'):
+
+        energy = obj['energy']
+        volume = obj['volume']
+        if not compare_dbs(db1, energy, volume) and not compare_dbs(db2, energy, volume) and not compare_dbs(db3, energy, volume) and not compare_dbs(db4, energy, volume) and not compare_dbs(db5, energy, volume):
+
+            print('Did not find energy or volume for id: ' + str(obj['id']))
+            num_ids += 1
+
+    print(num_ids)
+
+
+def compare_dbs(db, energy, volume):
+
+    found_energy = False
+
+    for obj in db.select(is_initial=0):
+
+        if round(energy,3) == round(obj['energy'],3):
+            #print(round(energy,3), round(obj['energy'],3))
+            if (volume == obj['volume']):
+
+                found_energy = True
+
+    return found_energy
+
+#check_databases()
 #create_db_organize()
 #insert_structures()
 #create_xyz()

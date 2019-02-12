@@ -71,3 +71,8 @@ first run: 166-176 (099-104),(113-116)
 11/2:
 
 run small_structures_cubic 176-186 (315-325)
+
+12/2:
+
+rerun with kpts 5.4 176-184
+stallo down, rerun 181, 182, 185, 186
