@@ -76,3 +76,14 @@ run small_structures_cubic 176-186 (315-325)
 
 rerun with kpts 5.4 176-184
 stallo down, rerun 181, 182, 185, 186
+
+13/2
+
+cubic:
+rerun 181
+first run 187-199
+
+27 new:
+
+rerun 21,22,24,25
+first run 26-30 (274-282)

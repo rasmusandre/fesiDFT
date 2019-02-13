@@ -35,7 +35,7 @@ def evaluate(ceBulk):
     # change_prob=0.2, fname="ga_fesi.csv", max_cluster_dia=6)
     # names = ga.run(min_change=0.001, gen_without_change=100)
 
-    scond = [('converged','=',1), ('c1_0', '>', -0.4)]#, ('id','!=',15), ('id', '!=',16)]#, ('group','<',4), ('id','!=',15), ('id', '!=',16)] #(group, =, 0)
+    scond = [('converged','=',1), ('c1_0', '>', -0.1)]#, ('id','!=',15), ('id', '!=',16)]#, ('group','<',4), ('id','!=',15), ('id', '!=',16)] #(group, =, 0)
 
 
 
@@ -76,10 +76,10 @@ def evaluate_GA(ceBulk):
 
     from ase.clease import GAFit, Evaluate
 
-    scond = [('converged','=',1), ('c1_0', '>', -0.4)]#, ('group', '<=', 2)]
+    scond = [('converged','=',1), ('c1_0', '>', -0.1)]#, ('group', '<=', 2)]
 
     #ga = GAFit(setting=ceBulk, alpha=1E-8, mutation_prob=0.01, num_individuals="auto",
-    #fname="ga_fesi.csv", max_cluster_dia=6, include_subclusters=False, select_cond=scond)
+    #fname="ga_fesi.csv", max_cluster_dia=6, include_subclusters=False, select_cond=scond, cost_func='bic')
 
     #names = ga.run(min_change=0.001, gen_without_change=100)
 
@@ -89,10 +89,11 @@ def evaluate_GA(ceBulk):
 
     #scond = [('converged','=',1), ('c1_0', '>', -0.4)]#, ('id','!=',15), ('id', '!=',16)]
 
-    evaluator = Evaluate(ceBulk, cluster_names=names, fitting_scheme="l1", parallel=False, alpha=1.3*1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=6, max_cluster_size=5, select_cond=scond)
+    evaluator = Evaluate(ceBulk, cluster_names=names, fitting_scheme="l1", parallel=False, alpha=7.7*1E-4,
+    scoring_scheme="loocv_fast", max_cluster_dia=6, max_cluster_size=4, select_cond=scond)
     #for all: 1.3E-4,5,4
-    #evaluator.plot_CV()
+    #alp = evaluator.plot_CV()
+
     #evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False,
     #scoring_scheme="loocv_fast")
 

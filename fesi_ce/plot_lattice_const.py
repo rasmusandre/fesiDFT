@@ -3,6 +3,8 @@ from ase import Atom, Atoms
 from ase.visualize import view
 from ase.db import connect
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy.spatial import ConvexHull
 
 def get_energies():
 
@@ -53,13 +55,13 @@ def get_ids():
 
         if 'energy' in obj:
             ids.append(obj['id'])
-            print(obj['formula'])
+            #print(obj['formula'])
 
     return ids
 
 def plot_lattice_const():
 
-    db = connect('FeSi_8atoms_12finished.db')
+    db = connect('FeSi_8atoms.db')
 
     lattice_const = []
     mag_mom = []
@@ -88,9 +90,15 @@ def plot_lattice_const():
         #print('----------')
         #for obj in db.select(id=id):
             #mag_val = obj['magmom']/(num_si+num_fe)
-        #mag_val = bulk.get_magnetic_moment()
-        #mag_mom.append(mag_val)
+        try:
+
+            mag_val = bulk.get_magnetic_moment()
+
+            print(mag_val)
+        except:
+            raise ValueError('Could not find magmom for id ' + str(id))
         num_atoms = num_si+num_fe
+        mag_mom.append(mag_val/num_atoms)
         if num_atoms==27:
             val = (1/3)*(2*bulk.get_volume())**(1/3)
             plt.plot(num_si/num_atoms, val, 'ro')
@@ -100,17 +108,17 @@ def plot_lattice_const():
         if num_atoms==8:
             val = (2/5)*(2*bulk.get_volume())**(1/3)
             plt.plot(num_si/num_atoms, val, 'go')
-        
+
         lattice_const.append(val)
 
     si_conc2 = si_conc
-    #si_conc2, mag_mom = (list(t) for t in zip(*sorted(zip(si_conc2, mag_mom))))
+    si_conc2, mag_mom = (list(t) for t in zip(*sorted(zip(si_conc2, mag_mom))))
     si_conc, lattice_const = (list(t) for t in zip(*sorted(zip(si_conc, lattice_const))))
     plt.figure(0)
     plt.plot(si_conc, lattice_const,'o')
-    #plt.figure(1)
-    #plt.plot(si_conc2, mag_mom, 'o')
-    #plt.plot([0,1],[mag_mom[0],mag_mom[-1]],'r')
+    plt.figure(1)
+    plt.plot(si_conc2, mag_mom, 'o')
+    plt.plot([0,1],[mag_mom[0],mag_mom[-1]],'r')
     plt.xlabel('X(Si)')
     plt.ylabel('Magnetic moment per atom')
     plt.show()
@@ -156,22 +164,96 @@ def brute_force():
     plt.grid(True)
     plt.show()
 
-plot_lattice_const()
-k = 2
-mat = bulk('Fe','bcc',a=2.86)*(2,2,4)
-#view(mat)
-print(mat.get_volume())
-lc = (2*mat.get_volume())**(1/3)
-print(lc)
+
+
+def plot_formation_energy():
+
+    db = connect('FeSi_8atoms_12finished.db')
+    ids = get_ids()
+    si_conc = []
+    energies = []
+
+    for obj in db.select(formula='Fe8',struct_type='final'):
+        fe_ene = obj['energy']/8
+    for obj in db.select(formula='Si8',struct_type='final'):
+        si_ene = obj['energy']/8
+
+    for id in ids:
+
+        bulk = db.get_atoms(id=id)
+        symbols = bulk.get_chemical_symbols()
+        num_fe = 0
+        num_si = 0
+
+        for sym in symbols:
+
+            if sym == 'Fe':
+                num_fe += 1
+            else:
+                num_si += 1
+
+        num_atoms = num_si + num_fe
+        si_conc.append(num_si/num_atoms)
+
+        for obj in db.select(id=id):
+
+            energies.append(obj['energy']/(num_atoms) - (num_si/num_atoms)*si_ene - (num_fe/num_atoms)*fe_ene)
+
+
+    si_conc, energies = (list(t) for t in zip(*sorted(zip(si_conc, energies))))
+
+    ch_conc = []
+    ch_en = []
+
+    ch_conc.append(si_conc[0])
+    ch_en.append(energies[0])
+
+    for i in range(1,len(si_conc)):
+
+        if ch_conc[-1] != si_conc[i]:
+
+            ch_conc.append(si_conc[i])
+            ch_en.append(energies[i])
+
+        if ch_conc[-1] == si_conc[i] and energies[i] < ch_en[-1]:
+
+            ch_en[-1] = energies[i]
+
+    ch_conc, ch_en = (list(t) for t in zip(*sorted(zip(ch_conc, ch_en))))
+
+
+    conv_hull_x = []
+    conv_hull_y = []
+
+    conv_hull_x.append(ch_conc[0])
+    conv_hull_y.append(ch_en[0])
+    data = np.column_stack((ch_conc,ch_en))
+    hull = ConvexHull(data)
+
+
+    #plt.plot(data[hull.vertices[0],0], data[hull.vertices[0],1], 'ro')
+
+    x = list(data[hull.vertices,0])
+
+    y = list(data[hull.vertices,1])
+
+    x,y = (list(t) for t in zip(*sorted(zip(x, y))))
+
+    plt.figure(0)
+    #plt.plot(data[hull.vertices,0], data[hull.vertices,1], 'r--', lw=2)
+    #print(x)
+    plt.plot(x, y, 'r--', lw=2)
+
+    plt.plot(si_conc, energies,'bo')
+    plt.xlabel('X(Si)')
+    plt.ylabel('Formation energy [eV/atom]')
+    plt.title('Formation energy and convex hull for ' + str(len(ids)) + ' structures')
+    #plt.fill_between([0.5375,1],[-0.75,-0.75], facecolor='grey', alpha=0.5)
+    plt.fill_between([0.5375,1.01],[-0.75,-0.75], [0.075, 0.075], facecolor='grey', alpha=0.3)
+    plt.show()
 
 
 
 
-
-
-
-
-
-
-
+plot_formation_energy()
 #get_energies()
