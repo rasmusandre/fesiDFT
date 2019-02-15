@@ -45,38 +45,63 @@ def evaluate(ceBulk):
     #compressive = BayesianCompressiveSensing(noise=0.1)
     # evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-8,
     # scoring_scheme="loocv_fast", cluster_names=names)
+
+
     evaluator = Evaluate(ceBulk, fitting_scheme="l1", parallel=False, alpha=1.3*1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=5, max_cluster_size=4, select_cond=scond)
-    #evaluator.plot_CV()
-    #for c1_0 >-0.4, alpha=1.3E-4, dia=5, size=4
-    #for group<3 alpha 0.2*1E-4
-    #for l2, alpha=1E-2, max_dia=5, max_size=3
-    #for group=0, alpha=1.3E-4, dia=6, size=4
-    #for group=0,1, alpha=4.6E-4, dia=6, size=3
-    #evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False,
-    #scoring_scheme="loocv_fast")
-    #x = evaluator.cf_matrix
-    #k = x.T.dot(x)
-    #print(k.shape)
-    #print(np.linalg.matrix_rank(x.T.dot(x)))
-    evaluator.plot_fit(interactive=False)
+    scoring_scheme="loocv_fast", max_cluster_dia=5.5, max_cluster_size=5, select_cond=scond)
+
+        #evaluator.plot_CV()
+        #for c1_0 >-0.4, alpha=1.3E-4, dia=5, size=4
+        #for group<3 alpha 0.2*1E-4
+        #for l2, alpha=1E-2, max_dia=5, max_size=3
+        #for group=0, alpha=1.3E-4, dia=6, size=4
+        #for group=0,1, alpha=4.6E-4, dia=6, size=3
+        #evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False,
+        #scoring_scheme="loocv_fast")
+        #x = evaluator.cf_matrix
+        #k = x.T.dot(x)
+        #print(k.shape)
+        #print(np.linalg.matrix_rank(x.T.dot(x)))
+
+    #evaluator.plot_fit(interactive=False, show_hull=False)
+    #evaluator.plot_ECI()
     eci_names = evaluator.get_cluster_name_eci(return_type="dict")
-
+    eci_fname = 'my_file_eci.json'
     with open(eci_fname,'w') as outfile:
-        json.dump(eci_name, outfile, indent=2, separators=(",",":"))
+        json.dump(eci_names, outfile, indent=2, separators=(",",":"))
 
-def convex_hull():
-    from ase.clease import ConvexHull
+    plot_eci(eci_fname)
+
+
+def plot_eci(name_of_json, show_zero_one_body=True):
+
+    with open(name_of_json) as f:
+        data = json.load(f)
+
+
     import matplotlib.pyplot as plt
-    ch = ConvexHull('FeSi_8atoms_12finished.db')
-    ch.plot()
+    plt.figure(0)
+    for key in data:
+        if (show_zero_one_body):
+            if (len(key) > 5):
+                plt.bar(key[:9],data[key])
+            else:
+                plt.bar(key,data[key])
+        else:
+            if (len(key) > 5) and key != 'c0' and key != 'c1_0':
+                plt.bar(key[:9],data[key])
+            if (len(key) <= 5) and key != 'c0' and key != 'c1_0':
+                plt.bar(key,data[key])
+
+    plt.xticks(rotation=90)
+    plt.ylabel('ECI [eV/atom]')
     plt.show()
 
 def evaluate_GA(ceBulk):
 
     from ase.clease import GAFit, Evaluate
 
-    scond = [('converged','=',1), ('c1_0', '>', -0.1)]#, ('group', '<=', 2)]
+    scond = [('converged','=',1), ('c1_0', '>', -0.1)]#, ('id', '!=', '15'), ('id', '!=', '16')]#, ('group', '<=', 2)]
 
     #ga = GAFit(setting=ceBulk, alpha=1E-8, mutation_prob=0.01, num_individuals="auto",
     #fname="ga_fesi.csv", max_cluster_dia=6, include_subclusters=False, select_cond=scond, cost_func='bic')
@@ -97,11 +122,13 @@ def evaluate_GA(ceBulk):
     #evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False,
     #scoring_scheme="loocv_fast")
 
-    evaluator.plot_fit(interactive=True)
+    #evaluator.plot_fit(interactive=True)
     eci_names = evaluator.get_cluster_name_eci(return_type="dict")
-
+    eci_fname = 'my_file_eci_ga.json'
     with open(eci_fname,'w') as outfile:
-        json.dump(eci_name, outfile, indent=2, separators=(",",":"))
+        json.dump(eci_names, outfile, indent=2, separators=(",",":"))
+
+    plot_eci(eci_fname, show_zero_one_body=False)
 
 def insert_experimental_fesi_structure(struct_gen, struct_energy):
 

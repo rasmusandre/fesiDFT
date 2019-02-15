@@ -87,3 +87,11 @@ first run 187-199
 
 rerun 21,22,24,25
 first run 26-30 (274-282)
+
+15/2:
+
+cubic:
+change kpts and rerun, 187-199
+
+27 new:
+change kpts and rerun 22,24,28,29,30
