@@ -95,3 +95,13 @@ change kpts and rerun, 187-199
 
 27 new:
 change kpts and rerun 22,24,28,29,30
+
+18/2:
+
+27 new:
+rerun: 21, 22, 23, 25, 26, 27, 28, 30
+change kpts: 24
+
+cubic:
+rerun 188, 189, 190, 191, 192, 193, 196, 198
+change kpts: 199

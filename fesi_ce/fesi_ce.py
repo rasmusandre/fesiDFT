@@ -70,7 +70,7 @@ def evaluate(ceBulk):
     with open(eci_fname,'w') as outfile:
         json.dump(eci_names, outfile, indent=2, separators=(",",":"))
 
-    plot_eci(eci_fname)
+    plot_eci(eci_fname, show_zero_one_body=False)
 
 
 def plot_eci(name_of_json, show_zero_one_body=True):
@@ -104,7 +104,7 @@ def evaluate_GA(ceBulk):
     scond = [('converged','=',1), ('c1_0', '>', -0.1)]#, ('id', '!=', '15'), ('id', '!=', '16')]#, ('group', '<=', 2)]
 
     #ga = GAFit(setting=ceBulk, alpha=1E-8, mutation_prob=0.01, num_individuals="auto",
-    #fname="ga_fesi.csv", max_cluster_dia=6, include_subclusters=False, select_cond=scond, cost_func='bic')
+    #fname="ga_fesi.csv", max_cluster_dia=6, cost_func='loocv', include_subclusters=False, select_cond=scond)
 
     #names = ga.run(min_change=0.001, gen_without_change=100)
 
@@ -114,21 +114,20 @@ def evaluate_GA(ceBulk):
 
     #scond = [('converged','=',1), ('c1_0', '>', -0.4)]#, ('id','!=',15), ('id', '!=',16)]
 
-    evaluator = Evaluate(ceBulk, cluster_names=names, fitting_scheme="l1", parallel=False, alpha=7.7*1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=6, max_cluster_size=4, select_cond=scond)
+    evaluator = Evaluate(ceBulk, cluster_names=names, fitting_scheme="l1", parallel=False, alpha=0.2*1E-4,
+    scoring_scheme="loocv_fast", max_cluster_dia=7, max_cluster_size=6, select_cond=scond)
     #for all: 1.3E-4,5,4
     #alp = evaluator.plot_CV()
 
-    #evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False,
-    #scoring_scheme="loocv_fast")
 
-    #evaluator.plot_fit(interactive=True)
+
+    evaluator.plot_fit(interactive=True)
     eci_names = evaluator.get_cluster_name_eci(return_type="dict")
     eci_fname = 'my_file_eci_ga.json'
     with open(eci_fname,'w') as outfile:
         json.dump(eci_names, outfile, indent=2, separators=(",",":"))
 
-    plot_eci(eci_fname, show_zero_one_body=False)
+    #plot_eci(eci_fname, show_zero_one_body=False)
 
 def insert_experimental_fesi_structure(struct_gen, struct_energy):
 
@@ -158,11 +157,14 @@ def create_xyz(database_name, initial_id, final_id):
 
 def insert_structures():
 
-    database = 'FeSi_8atoms_12finished_cubic.db'
+    database = 'FeSi_27atoms_final.db'
     #structure_ids = [(166,200,-15.324), (170,201,-30.649), (167,202,-33.294), (169,203,-30.178),
     #(174,204,-44.978), (175,205,-39.996), (177,206,-48.644), (173,207,-43.319), (172,208,-48.201), (168,209,-25.080)]
     #structure_ids = [(169,203,-30.178)]
-    structure_ids = [(176,210,-40.408),(177,211,-40.505),(178,212,-48.305),(179,215,-51.335),(180,213,-45.974),(184,214,-60.355)]
+    #structure_ids = [(187,216,-64.360), (181,217,-62.878), (194,218,-66.587), (195,219,-66.965), (197,220,-58.033)]
+    structure_ids = [(17,18,-205.707), (19,20,-177.696), (21,22,-172.908), (23,24,-173.178), (25,26,-238.484)]
+    #cubic: from 215-220
+    #27 new: 18-26
     #from ase.db import connect
     #from ase.io import write
     #db = connect('FeSi_8atoms_12finished.db')
