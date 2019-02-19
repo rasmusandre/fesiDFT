@@ -35,7 +35,7 @@ def evaluate(ceBulk):
     # change_prob=0.2, fname="ga_fesi.csv", max_cluster_dia=6)
     # names = ga.run(min_change=0.001, gen_without_change=100)
 
-    scond = [('converged','=',1), ('c1_0', '>', -0.1)]#, ('id','!=',15), ('id', '!=',16)]#, ('group','<',4), ('id','!=',15), ('id', '!=',16)] #(group, =, 0)
+    scond = [('converged','=',1), ('c1_0', '>', -0.25)]#, ('id','!=',15), ('id', '!=',16)]#, ('group','<',4), ('id','!=',15), ('id', '!=',16)] #(group, =, 0)
 
 
 
@@ -48,9 +48,9 @@ def evaluate(ceBulk):
 
 
     evaluator = Evaluate(ceBulk, fitting_scheme="l1", parallel=False, alpha=1.3*1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=5.5, max_cluster_size=5, select_cond=scond)
+    scoring_scheme="loocv_fast", max_cluster_dia=6, max_cluster_size=5, select_cond=scond)
 
-        #evaluator.plot_CV()
+    #evaluator.plot_CV()
         #for c1_0 >-0.4, alpha=1.3E-4, dia=5, size=4
         #for group<3 alpha 0.2*1E-4
         #for l2, alpha=1E-2, max_dia=5, max_size=3
@@ -63,14 +63,14 @@ def evaluate(ceBulk):
         #print(k.shape)
         #print(np.linalg.matrix_rank(x.T.dot(x)))
 
-    #evaluator.plot_fit(interactive=False, show_hull=False)
+    evaluator.plot_fit(interactive=False)#, show_hull=False)
     #evaluator.plot_ECI()
     eci_names = evaluator.get_cluster_name_eci(return_type="dict")
     eci_fname = 'my_file_eci.json'
     with open(eci_fname,'w') as outfile:
         json.dump(eci_names, outfile, indent=2, separators=(",",":"))
 
-    plot_eci(eci_fname, show_zero_one_body=False)
+    #plot_eci(eci_fname, show_zero_one_body=False)
 
 
 def plot_eci(name_of_json, show_zero_one_body=True):
@@ -89,13 +89,71 @@ def plot_eci(name_of_json, show_zero_one_body=True):
                 plt.bar(key,data[key])
         else:
             if (len(key) > 5) and key != 'c0' and key != 'c1_0':
-                plt.bar(key[:9],data[key])
+                plt.bar(key[:10],data[key])
             if (len(key) <= 5) and key != 'c0' and key != 'c1_0':
                 plt.bar(key,data[key])
 
     plt.xticks(rotation=90)
     plt.ylabel('ECI [eV/atom]')
     plt.show()
+
+def investigate_eci(name_of_json):
+
+    negative_corr_val = 'Fe'
+    positive_corr_val = 'Si'
+
+    nn_configurations = []
+
+    with open(name_of_json) as f:
+        data = json.load(f)
+
+    for z, key in enumerate(data):
+
+        name = key
+        name.split('_')
+        number_of_atoms_in_cluster = int(name[1])
+        num_conf = []
+        if data[key] > 0:
+
+
+            print(key)
+
+            if number_of_atoms_in_cluster%2 == 0:
+                print('Number of -1:')
+                for i in range(1,number_of_atoms_in_cluster,2):
+                    print(i)
+                    num_conf.append(i)
+            else:
+                print('Number of -1:')
+                for i in range(1, number_of_atoms_in_cluster+1, 2):
+                    print(i)
+                    num_conf.append(i)
+        if data[key] < 0:
+
+            print(key)
+
+            if number_of_atoms_in_cluster%2 == 0:
+                print('Number of -1:')
+                for i in range(0,number_of_atoms_in_cluster+1,2):
+                    print(i)
+                    num_conf.append(i)
+
+            else:
+                print('Number of -1:')
+                for i in range(0, number_of_atoms_in_cluster, 2):
+                    print(i)
+                    num_conf.append(i)
+
+        nn_configurations.append({'key': key, 'energy': data[key], 'number of atoms': number_of_atoms_in_cluster, 'data': num_conf})
+
+    for c in nn_configurations:
+
+        for num_neg in c['data']:
+
+            c[str(num_neg)] = 'Fe'+str(num_neg) + 'Si' + str(c['number of atoms'] - num_neg)
+
+    for c in nn_configurations:
+        print(c)
 
 def evaluate_GA(ceBulk):
 
@@ -121,13 +179,15 @@ def evaluate_GA(ceBulk):
 
 
 
-    evaluator.plot_fit(interactive=True)
+    #evaluator.plot_fit(interactive=True)
     eci_names = evaluator.get_cluster_name_eci(return_type="dict")
     eci_fname = 'my_file_eci_ga.json'
     with open(eci_fname,'w') as outfile:
         json.dump(eci_names, outfile, indent=2, separators=(",",":"))
 
-    #plot_eci(eci_fname, show_zero_one_body=False)
+
+    investigate_eci(eci_fname)
+    plot_eci(eci_fname, show_zero_one_body=False)
 
 def insert_experimental_fesi_structure(struct_gen, struct_energy):
 

@@ -124,6 +124,53 @@ def plot_lattice_const():
     plt.show()
 
 
+def get_lattice_constants():
+
+    db = connect('FeSi_8atoms_12finished.db')
+    ids = get_ids()
+    si_conc = []
+    lattice_constants = []
+    min_distances = []
+
+    for num, id in enumerate(ids, 1):
+
+        bulk = db.get_atoms(id=id)
+        symbols = bulk.get_chemical_symbols()
+        num_fe = 0
+        num_si = 0
+
+        for sym in symbols:
+            if sym == 'Fe':
+                num_fe += 1
+            else:
+                num_si += 1
+
+        num_atoms = num_fe + num_si
+
+        unit_cell_vectors = bulk.get_cell()
+        vol = np.dot(unit_cell_vectors[0], np.cross(unit_cell_vectors[1],unit_cell_vectors[2]))
+        lattice_param = (2*vol)**(1/3)
+        if num_atoms == 16:
+            lattice_constants.append(lattice_param)
+            si_conc.append(num_si/num_atoms)
+
+        positions = bulk.get_positions()
+
+        distances = []
+
+        for i in range(len(positions)-1):
+            for j in range(i+1, len(positions)):
+                distances.append(get_distance(positions[i],positions[j]))
+
+        min_distances.append(min(distances))
+
+    plt.figure(0)
+    plt.plot(si_conc, lattice_constants, '*')
+    plt.show()
+
+def get_distance(pt1, pt2):
+
+    return ((pt1[0]-pt2[0])**2 + (pt1[1]-pt2[1])**2 + (pt1[2]-pt2[2])**2)**(1/3)
 
 
 def find_atoms():
@@ -254,6 +301,6 @@ def plot_formation_energy():
 
 
 
-
-plot_formation_energy()
+get_lattice_constants()
+#plot_formation_energy()
 #get_energies()

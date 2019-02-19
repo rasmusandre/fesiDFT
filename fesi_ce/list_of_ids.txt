@@ -105,3 +105,11 @@ change kpts: 24
 cubic:
 rerun 188, 189, 190, 191, 192, 193, 196, 198
 change kpts: 199
+
+19/2:
+
+27 new:
+done: 22, 23, 24,
+
+27 v3:
+first run 1-10 (252-261)

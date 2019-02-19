@@ -23,7 +23,7 @@ def prepare_random_structure():
     num_fe = 0
     num_si = 10
 
-    while num_si/(num_si + num_fe) > 0.75:
+    while num_si/(num_si + num_fe) > 0.4:
         num_fe = randint(0,27)
         num_si = 27 - num_fe
 
@@ -32,7 +32,7 @@ def prepare_random_structure():
 def prepare_random_structures():
 
 
-    db = connect('FeSi_27atoms_initial_v2.db')
+    db = connect('FeSi_27atoms_initial_v3.db')
     added_to_db = 0
 
     while added_to_db < 1000:
@@ -47,7 +47,7 @@ def prepare_random_structures():
                     num_si += 1
 
 
-        if not exists_in_db(atoms, 'FeSi_27_atoms_initial_v2.db' ) and not exists_in_db(atoms, 'FeSi_27atoms_initial.db') and not exists_in_db(atoms, 'FeSi_16_atoms_initial.db') and not exists_in_db(atoms, 'FeSi_8atoms_initial.db'):
+        if not exists_in_db(atoms, 'FeSi_27_atoms_initial_v3.db') and not exists_in_db(atoms, 'FeSi_27_atoms_initial_v2.db' ) and not exists_in_db(atoms, 'FeSi_27atoms_initial.db') and not exists_in_db(atoms, 'FeSi_16_atoms_initial.db') and not exists_in_db(atoms, 'FeSi_8atoms_initial.db'):
             db.write(atoms, struct_type = 'initial')
             added_to_db += 1
 
