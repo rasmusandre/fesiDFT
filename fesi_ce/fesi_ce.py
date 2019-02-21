@@ -18,8 +18,8 @@ def main():
     struct_generator = NewStructures(ceBulk, struct_per_gen=10)
     #print(ceBulk.basis_functions)
     #reconfigure(ceBulk)
-    evaluate_GA(ceBulk)
-    #insert_experimental_fesi_structure(struct_generator)
+    evaluate(ceBulk)
+
 
 def reconfigure(ceBulk):
 
@@ -30,40 +30,16 @@ def reconfigure(ceBulk):
 
 def evaluate(ceBulk):
 
-    from ase.clease import GAFit, Evaluate
-    # ga = GAFit(setting=ceBulk, alpha=1E-8, mutation_prob=0.01, num_individuals="auto",
-    # change_prob=0.2, fname="ga_fesi.csv", max_cluster_dia=6)
-    # names = ga.run(min_change=0.001, gen_without_change=100)
+    from ase.clease import Evaluate
 
-    scond = [('converged','=',1), ('c1_0', '>', -0.25)]#, ('id','!=',15), ('id', '!=',16)]#, ('group','<',4), ('id','!=',15), ('id', '!=',16)] #(group, =, 0)
+    scond = [('converged','=',1), ('c1_0', '>', -0.05)]#, ('id','!=',15), ('id', '!=',16)]#, ('group','<',4), ('id','!=',15), ('id', '!=',16)] #(group, =, 0)
 
-
-
-    with open("ga_fesi_cluster_names.txt", 'r') as infile:
-        lines = infile.readlines()
-    names = [x.strip() for x in lines]
-    #compressive = BayesianCompressiveSensing(noise=0.1)
-    # evaluator = Evaluate(ceBulk, fitting_scheme="l2", parallel=False, alpha=1E-8,
-    # scoring_scheme="loocv_fast", cluster_names=names)
-
-
-    evaluator = Evaluate(ceBulk, fitting_scheme="l1", parallel=False, alpha=1.3*1E-4,
+    evaluator = Evaluate(ceBulk, fitting_scheme="l1", parallel=False, alpha=1.29*1E-4,
     scoring_scheme="loocv_fast", max_cluster_dia=6, max_cluster_size=5, select_cond=scond)
 
     #evaluator.plot_CV()
-        #for c1_0 >-0.4, alpha=1.3E-4, dia=5, size=4
-        #for group<3 alpha 0.2*1E-4
-        #for l2, alpha=1E-2, max_dia=5, max_size=3
-        #for group=0, alpha=1.3E-4, dia=6, size=4
-        #for group=0,1, alpha=4.6E-4, dia=6, size=3
-        #evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False,
-        #scoring_scheme="loocv_fast")
-        #x = evaluator.cf_matrix
-        #k = x.T.dot(x)
-        #print(k.shape)
-        #print(np.linalg.matrix_rank(x.T.dot(x)))
 
-    evaluator.plot_fit(interactive=False)#, show_hull=False)
+    evaluator.plot_fit(interactive=True, show_hull=False)
     #evaluator.plot_ECI()
     eci_names = evaluator.get_cluster_name_eci(return_type="dict")
     eci_fname = 'my_file_eci.json'
@@ -71,7 +47,38 @@ def evaluate(ceBulk):
         json.dump(eci_names, outfile, indent=2, separators=(",",":"))
 
     #plot_eci(eci_fname, show_zero_one_body=False)
+    #investigate_eci(eci_fname)
 
+def evaluate_GA(ceBulk):
+
+    from ase.clease import GAFit, Evaluate
+
+    scond = [('converged','=',1), ('c1_0', '>', -0.25)]#, ('id', '!=', '15'), ('id', '!=', '16')]#, ('group', '<=', 2)]
+
+    #ga = GAFit(setting=ceBulk, alpha=1E-8, mutation_prob=0.01, num_individuals="auto",
+    #fname="ga_fesi.csv", max_cluster_dia=6, cost_func='loocv', include_subclusters=False, select_cond=scond)
+
+    #names = ga.run(min_change=0.001, gen_without_change=100)
+
+    with open("ga_fesi_cluster_names.txt", 'r') as infile:
+        lines = infile.readlines()
+    names = [x.strip() for x in lines]
+
+    #scond = [('converged','=',1), ('c1_0', '>', -0.4)]#, ('id','!=',15), ('id', '!=',16)]
+
+    evaluator = Evaluate(ceBulk, cluster_names=names, fitting_scheme="l1", parallel=False, alpha=1.3*1E-4,
+    scoring_scheme="loocv_fast", max_cluster_dia=6, max_cluster_size=7, select_cond=scond)
+
+    #alp = evaluator.plot_CV()
+
+    evaluator.plot_fit(interactive=True, show_hull=False)
+    eci_names = evaluator.get_cluster_name_eci(return_type="dict")
+    eci_fname = 'my_file_eci_ga.json'
+    with open(eci_fname,'w') as outfile:
+        json.dump(eci_names, outfile, indent=2, separators=(",",":"))
+
+    #investigate_eci(eci_fname)
+    #plot_eci(eci_fname, show_zero_one_body=False)
 
 def plot_eci(name_of_json, show_zero_one_body=True):
 
@@ -119,29 +126,29 @@ def investigate_eci(name_of_json):
             print(key)
 
             if number_of_atoms_in_cluster%2 == 0:
-                print('Number of -1:')
+
                 for i in range(1,number_of_atoms_in_cluster,2):
-                    print(i)
+
                     num_conf.append(i)
             else:
-                print('Number of -1:')
+
                 for i in range(1, number_of_atoms_in_cluster+1, 2):
-                    print(i)
+
                     num_conf.append(i)
         if data[key] < 0:
 
             print(key)
 
             if number_of_atoms_in_cluster%2 == 0:
-                print('Number of -1:')
+
                 for i in range(0,number_of_atoms_in_cluster+1,2):
-                    print(i)
+
                     num_conf.append(i)
 
             else:
-                print('Number of -1:')
+
                 for i in range(0, number_of_atoms_in_cluster, 2):
-                    print(i)
+
                     num_conf.append(i)
 
         nn_configurations.append({'key': key, 'energy': data[key], 'number of atoms': number_of_atoms_in_cluster, 'data': num_conf})
@@ -150,44 +157,12 @@ def investigate_eci(name_of_json):
 
         for num_neg in c['data']:
 
-            c[str(num_neg)] = 'Fe'+str(num_neg) + 'Si' + str(c['number of atoms'] - num_neg)
+            c[str(num_neg)] = negative_corr_val+str(num_neg) + positive_corr_val + str(c['number of atoms'] - num_neg)
 
     for c in nn_configurations:
         print(c)
 
-def evaluate_GA(ceBulk):
 
-    from ase.clease import GAFit, Evaluate
-
-    scond = [('converged','=',1), ('c1_0', '>', -0.1)]#, ('id', '!=', '15'), ('id', '!=', '16')]#, ('group', '<=', 2)]
-
-    #ga = GAFit(setting=ceBulk, alpha=1E-8, mutation_prob=0.01, num_individuals="auto",
-    #fname="ga_fesi.csv", max_cluster_dia=6, cost_func='loocv', include_subclusters=False, select_cond=scond)
-
-    #names = ga.run(min_change=0.001, gen_without_change=100)
-
-    with open("ga_fesi_cluster_names.txt", 'r') as infile:
-        lines = infile.readlines()
-    names = [x.strip() for x in lines]
-
-    #scond = [('converged','=',1), ('c1_0', '>', -0.4)]#, ('id','!=',15), ('id', '!=',16)]
-
-    evaluator = Evaluate(ceBulk, cluster_names=names, fitting_scheme="l1", parallel=False, alpha=0.2*1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=7, max_cluster_size=6, select_cond=scond)
-    #for all: 1.3E-4,5,4
-    #alp = evaluator.plot_CV()
-
-
-
-    #evaluator.plot_fit(interactive=True)
-    eci_names = evaluator.get_cluster_name_eci(return_type="dict")
-    eci_fname = 'my_file_eci_ga.json'
-    with open(eci_fname,'w') as outfile:
-        json.dump(eci_names, outfile, indent=2, separators=(",",":"))
-
-
-    investigate_eci(eci_fname)
-    plot_eci(eci_fname, show_zero_one_body=False)
 
 def insert_experimental_fesi_structure(struct_gen, struct_energy):
 
@@ -222,7 +197,9 @@ def insert_structures():
     #(174,204,-44.978), (175,205,-39.996), (177,206,-48.644), (173,207,-43.319), (172,208,-48.201), (168,209,-25.080)]
     #structure_ids = [(169,203,-30.178)]
     #structure_ids = [(187,216,-64.360), (181,217,-62.878), (194,218,-66.587), (195,219,-66.965), (197,220,-58.033)]
-    structure_ids = [(17,18,-205.707), (19,20,-177.696), (21,22,-172.908), (23,24,-173.178), (25,26,-238.484)]
+    #structure_ids = [(17,18,-205.707), (19,20,-177.696), (21,22,-172.908), (23,24,-173.178), (25,26,-238.484)]
+    #structure_ids = [(188,221,-54.473), (190,222,-55.886), (189,223,-59.582), (193,224,-50.170), (199,225,-61.299)]
+    #structure_ids = [(27,28,-168.263),(29,30,-197.639),(31,32,-235.868),(33,34,-229.364),(35,36,-238.484)]
     #cubic: from 215-220
     #27 new: 18-26
     #from ase.db import connect
