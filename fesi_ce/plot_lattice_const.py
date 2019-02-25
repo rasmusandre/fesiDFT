@@ -5,6 +5,7 @@ from ase.db import connect
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial import ConvexHull
+from fesi_ce import ret_evaluator, ret_evaluator_bcs
 
 def get_energies():
 
@@ -286,21 +287,40 @@ def plot_formation_energy():
 
     x,y = (list(t) for t in zip(*sorted(zip(x, y))))
 
-    plt.figure(0)
-    #plt.plot(data[hull.vertices,0], data[hull.vertices,1], 'r--', lw=2)
-    #print(x)
-    plt.plot(x, y, 'r--', lw=2)
+    ev = ret_evaluator(-0.05)
+    en_pred = ev.cf_matrix.dot(ev.eci)
+    conc_pred = ev.concs
+    form_conc_pred = []
+    form_en_pred = []
 
-    plt.plot(si_conc, energies,'bo')
+
+
+    for j in range(len(en_pred)):
+
+        if 'Si' in conc_pred[j] and 'Fe' in conc_pred[j]:
+
+            form_en_pred.append(en_pred[j]-conc_pred[j]['Si']*en_pred[0]-conc_pred[j]['Fe']*en_pred[-1])
+            form_conc_pred.append([conc_pred[j]['Si']])
+
+    form_conc_pred.append([1])
+    form_en_pred.append(0)
+    form_conc_pred.append([0])
+    form_en_pred.append(0)
+
+
+    plt.figure(0)
+    plt.plot(x, y, 'r--', lw=2)
+    plt.plot(form_conc_pred, form_en_pred, 'x')
+    plt.plot(si_conc, energies,'ro', fillstyle='none')
     plt.xlabel('X(Si)')
     plt.ylabel('Formation energy [eV/atom]')
-    plt.title('Formation energy and convex hull for ' + str(len(ids)) + ' structures')
+    plt.title('Formation energy and convex hull for {} structures'.format(len(form_en_pred)))
     #plt.fill_between([0.5375,1],[-0.75,-0.75], facecolor='grey', alpha=0.5)
     plt.fill_between([0.5375,1.01],[-0.75,-0.75], [0.075, 0.075], facecolor='grey', alpha=0.3)
     plt.show()
 
 
 
-get_lattice_constants()
-#plot_formation_energy()
+#get_lattice_constants()
+plot_formation_energy()
 #get_energies()

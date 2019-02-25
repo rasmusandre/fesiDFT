@@ -48,6 +48,54 @@ def evaluate(ceBulk):
 
     #plot_eci(eci_fname, show_zero_one_body=False)
     #investigate_eci(eci_fname)
+    #print(evaluator.cf_matrix.dot(evaluator.eci))
+
+def ret_evaluator(c1_0):
+
+    conc = Concentration(basis_elements=[['Fe','Si']])
+    ceBulk = CEBulk(crystalstructure='bcc', a=2.876, db_name='FeSi_8atoms_12finished.db',
+    max_cluster_size=4, size=[2,2,2],
+    max_cluster_dia=[0.0, 10, 10, 7.5, 5.5], concentration=conc, cubic=True)
+    struct_generator = NewStructures(ceBulk, struct_per_gen=10)
+
+    from ase.clease import Evaluate
+
+    #scond = [('converged','=',1)]#, ('c1_0', '>', c1_0)]#, ('id','!=',15), ('id', '!=',16)]#, ('group','<',4), ('id','!=',15), ('id', '!=',16)] #(group, =, 0)
+
+    evaluator = Evaluate(ceBulk, fitting_scheme="l1", parallel=False, alpha=1.29*1E-4,
+    scoring_scheme="loocv_fast", max_cluster_dia=6, max_cluster_size=5)#, select_cond=scond)
+    #evaluator.plot_fit()
+    eci_names = evaluator.get_cluster_name_eci(return_type="dict")
+    eci_fname = 'my_file_eci.json'
+    with open(eci_fname,'w') as outfile:
+        json.dump(eci_names, outfile, indent=2, separators=(",",":"))
+
+    return evaluator
+
+def ret_evaluator_bcs(c1_0):
+
+    conc = Concentration(basis_elements=[['Fe','Si']])
+    ceBulk = CEBulk(crystalstructure='bcc', a=2.876, db_name='FeSi_8atoms_12finished.db',
+    max_cluster_size=4, size=[2,2,2],
+    max_cluster_dia=[0.0, 10, 10, 7.5, 5.5], concentration=conc, cubic=True)
+    struct_generator = NewStructures(ceBulk, struct_per_gen=10)
+
+    from ase.clease import Evaluate
+
+    from ase.clease import BayesianCompressiveSensing
+    compressive = BayesianCompressiveSensing(noise=0.05)
+
+    scond = [('converged','=',1), ('c1_0', '>', c1_0)]#, ('id','!=',15), ('id', '!=',16)]#, ('group','<',4), ('id','!=',15), ('id', '!=',16)] #(group, =, 0)
+
+    evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False, alpha=1.29*1E-4,
+    scoring_scheme="loocv_fast", max_cluster_dia=6, max_cluster_size=5, select_cond=scond)#, select_cond=scond)
+    #evaluator.plot_fit()
+    eci_names = evaluator.get_cluster_name_eci(return_type="dict")
+    eci_fname = 'my_file_eci.json'
+    with open(eci_fname,'w') as outfile:
+        json.dump(eci_names, outfile, indent=2, separators=(",",":"))
+
+    return evaluator
 
 def evaluate_GA(ceBulk):
 
@@ -316,5 +364,5 @@ def compare_dbs(db, energy, volume):
 #insert_structures()
 #create_xyz()
 #sym_check()
-main()
+#main()
 #convex_hull()

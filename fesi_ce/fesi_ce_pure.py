@@ -18,7 +18,7 @@ def main():
     struct_generator = NewStructures(ceBulk, struct_per_gen=10)
     #print(ceBulk.basis_functions)
     #reconfigure(ceBulk)
-    evaluate(ceBulk)
+    evaluator = evaluate(ceBulk)
 
 
 def reconfigure(ceBulk):
@@ -48,6 +48,17 @@ def evaluate(ceBulk):
     with open(eci_fname,'w') as outfile:
         json.dump(eci_names, outfile, indent=2, separators=(",",":"))
 
+    """
+    Hvordan er clusterene definert?
+    I BCS, er det variance_opt_start og lamb_opt_start som skal sjekkes?
+    Forslag til hva jeg kan trekke inn i oppgaven ang. clusters? Slik Olve gjorde med største ECI
+    Hvordan printe configuration variabel (sigma +- 1)
+    Hvordan få CE predikert energi fra klassen?
+    Convex hull, hvorfor er ikke formation energy = 0 for X(Si) = 1?
+    """
+    #print((evaluator.cf_matrix.dot(evaluator.eci)))
+    #print(len(evaluator.concs))
+    #return evaluator
 
 def evaluate_GA(ceBulk):
 
