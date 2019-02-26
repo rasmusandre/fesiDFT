@@ -18,7 +18,7 @@ def main():
     struct_generator = NewStructures(ceBulk, struct_per_gen=10)
     #print(ceBulk.basis_functions)
     #reconfigure(ceBulk)
-    evaluator = evaluate(ceBulk)
+    evaluator = evaluate_GA(ceBulk)
 
 
 def reconfigure(ceBulk):
@@ -31,15 +31,15 @@ def reconfigure(ceBulk):
 def evaluate(ceBulk):
 
     from ase.clease import Evaluate, BayesianCompressiveSensing
-    compressive = BayesianCompressiveSensing(noise=0.05)#, variance_opt_start=0, lamb_opt_start=0)
+    compressive = BayesianCompressiveSensing(noise=0.005)#, variance_opt_start=0.01, lamb_opt_start=0.01)
 
-    scond = [('converged','=',1), ('c1_0', '>', -0.05)]
+    scond = [('converged','=',1), ('c1_0', '>', -0.05)]#, ('id', '!=', 39), ('id', '!=', 40)]
 
     evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False, alpha=1.29*1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=6, max_cluster_size=5, select_cond=scond)
+    scoring_scheme="loocv_fast", max_cluster_dia=8, max_cluster_size=7, select_cond=scond)
+
 
     #evaluator.plot_CV()
-
     evaluator.plot_fit(interactive=True)#, show_hull=False)
 
 
@@ -64,9 +64,9 @@ def evaluate_GA(ceBulk):
 
     from ase.clease import GAFit, Evaluate
 
-    scond = [('converged','=',1), ('c1_0', '>', -0.25)]
+    scond = [('converged','=',1), ('c1_0', '>', -0.05)]
 
-    #ga = GAFit(setting=ceBulk, alpha=1E-8, mutation_prob=0.01, num_individuals="auto",
+    #ga = GAFit(setting=ceBulk, mutation_prob=0.01, num_individuals="auto",
     #fname="ga_fesi.csv", max_cluster_dia=6, cost_func='loocv', include_subclusters=False, select_cond=scond)
 
     #names = ga.run(min_change=0.001, gen_without_change=100)
@@ -75,12 +75,15 @@ def evaluate_GA(ceBulk):
         lines = infile.readlines()
     names = [x.strip() for x in lines]
 
-    evaluator = Evaluate(ceBulk, cluster_names=names, fitting_scheme="l1", parallel=False, alpha=1.3*1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=6, max_cluster_size=7, select_cond=scond)
+    from ase.clease import BayesianCompressiveSensing
+    compressive = BayesianCompressiveSensing(noise=0.0005)
 
-    evaluator.plot_CV()
+    evaluator = Evaluate(ceBulk, cluster_names=names, fitting_scheme=compressive, parallel=False, alpha=1.3*1E-4,
+    scoring_scheme="loocv_fast", max_cluster_dia=8, max_cluster_size=8, select_cond=scond)
 
-    evaluator.plot_fit(interactive=True, show_hull=False)
+    #evaluator.plot_CV()
+
+    evaluator.plot_fit(interactive=True, show_hull=True)
     eci_names = evaluator.get_cluster_name_eci(return_type="dict")
     eci_fname = 'my_file_eci_ga.json'
     with open(eci_fname,'w') as outfile:
