@@ -18,7 +18,7 @@ def main():
     struct_generator = NewStructures(ceBulk, struct_per_gen=10)
     #print(ceBulk.basis_functions)
     #reconfigure(ceBulk)
-    evaluate(ceBulk)
+    #evaluate(ceBulk)
 
 
 def reconfigure(ceBulk):
@@ -35,9 +35,9 @@ def evaluate(ceBulk):
     scond = [('converged','=',1), ('c1_0', '>', -0.05)]#, ('id','!=',15), ('id', '!=',16)]#, ('group','<',4), ('id','!=',15), ('id', '!=',16)] #(group, =, 0)
 
     evaluator = Evaluate(ceBulk, fitting_scheme="l1", parallel=False, alpha=1.29*1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=6, max_cluster_size=5, select_cond=scond)
+    scoring_scheme="loocv_fast", max_cluster_dia=8, max_cluster_size=7, select_cond=scond)
 
-    evaluator.plot_CV()
+    #evaluator.plot_CV()
 
     evaluator.plot_fit(interactive=True, show_hull=False)
     #evaluator.plot_ECI()
@@ -154,8 +154,8 @@ def plot_eci(name_of_json, show_zero_one_body=True):
 
 def investigate_eci(name_of_json):
 
-    negative_corr_val = 'Fe'
-    positive_corr_val = 'Si'
+    negative_corr_val = 'Si'
+    positive_corr_val = 'Fe'
 
     nn_configurations = []
 
@@ -240,7 +240,7 @@ def create_xyz(database_name, initial_id, final_id):
 
 def insert_structures():
 
-    database = 'FeSi_27atoms_final_v3.db'
+    database = 'FeSi_27atoms_final.db'
     #structure_ids = [(166,200,-15.324), (170,201,-30.649), (167,202,-33.294), (169,203,-30.178),
     #(174,204,-44.978), (175,205,-39.996), (177,206,-48.644), (173,207,-43.319), (172,208,-48.201), (168,209,-25.080)]
     #structure_ids = [(169,203,-30.178)]
@@ -249,7 +249,9 @@ def insert_structures():
     #structure_ids = [(188,221,-54.473), (190,222,-55.886), (189,223,-59.582), (193,224,-50.170), (199,225,-61.299)]
     #structure_ids = [(27,28,-168.263),(29,30,-197.639),(31,32,-235.868),(33,34,-229.364),(35,36,-238.484)]
     #structure_ids = [(191, 226, -59.257), (192,227, -49.689 ), (229,198,-61.304)]
-    structure_ids = [(1,2,-223.448), (3,4,-225.704), (5,6,-223.011), (7,8,-203.672), (9,10,-216.070)]
+    #structure_ids = [(1,2,-223.448), (3,4,-225.704), (5,6,-223.011), (7,8,-203.672), (9,10,-216.070)]
+    #structure_ids = [(11,12,-202.746),(13,14,-219.845),(15,16,-238.707),(17,18,-193.109),(19,20,-205.707),(21,22,-225.508),(23,24,-230.160),(25,26,-230.503),(27,28,-213.077),(29,30,-217.468)]
+    structure_ids = [(41,42,-179.312),(43,44,-177.182)]
     #cubic: from 215-220
     #27 new: 18-26
     #from ase.db import connect
@@ -324,6 +326,33 @@ def sym_check():
 
             print(id)
 
+def find_duplicates():
+
+    from ase.db import connect
+    from ase.utils.structure_comparator import SymmetryEquivalenceCheck
+
+    db = connect('FeSi_8atoms_12finished.db')
+
+    ids = []
+
+    for k in db.select():
+        #id 111 is an empty row in the database
+        if k.id != 111:
+            ids.append(k.id)
+
+    for j, id in enumerate(ids,1):
+
+        atm1 = db.get_atoms(id=id)
+        print(id)
+        for id2 in ids[j:]:
+
+            atm2 = db.get_atoms(id=id2)
+            symcheck = SymmetryEquivalenceCheck()
+
+            if symcheck.compare(atm1,atm2):
+                #print duplicate ids
+                print(id,id2)
+
 def check_databases():
     from ase.db import connect
     db1 = connect('FeSi_8atoms.db')
@@ -368,4 +397,7 @@ if __name__ == '__main__':
     #create_xyz()
     #sym_check()
     main()
+    #find_duplicates()
     #convex_hull()
+    #investigate_eci('my_file_eci_ga.json')
+    #plot_eci('my_file_eci_ga.json',False)

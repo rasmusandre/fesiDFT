@@ -31,9 +31,9 @@ def reconfigure(ceBulk):
 def evaluate(ceBulk):
 
     from ase.clease import Evaluate, BayesianCompressiveSensing
-    compressive = BayesianCompressiveSensing(noise=0.005)#, variance_opt_start=0.01, lamb_opt_start=0.01)
+    compressive = BayesianCompressiveSensing(noise=0.01)#, variance_opt_start=0.01, lamb_opt_start=0.01)
 
-    scond = [('converged','=',1), ('c1_0', '>', -0.05)]#, ('id', '!=', 39), ('id', '!=', 40)]
+    scond = [('converged','=',1), ('c1_0', '>', -0.05)]#, ('group','<',4)]#, ('id', '!=', 39), ('id', '!=', 40)]
 
     evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False, alpha=1.29*1E-4,
     scoring_scheme="loocv_fast", max_cluster_dia=8, max_cluster_size=7, select_cond=scond)
@@ -71,12 +71,15 @@ def evaluate_GA(ceBulk):
 
     #names = ga.run(min_change=0.001, gen_without_change=100)
 
+    print(ceBulk.basis_functions)
+    #ceBulk.view_clusters()
+
     with open("ga_fesi_cluster_names.txt", 'r') as infile:
         lines = infile.readlines()
     names = [x.strip() for x in lines]
 
     from ase.clease import BayesianCompressiveSensing
-    compressive = BayesianCompressiveSensing(noise=0.0005)
+    compressive = BayesianCompressiveSensing(noise=0.005)
 
     evaluator = Evaluate(ceBulk, cluster_names=names, fitting_scheme=compressive, parallel=False, alpha=1.3*1E-4,
     scoring_scheme="loocv_fast", max_cluster_dia=8, max_cluster_size=8, select_cond=scond)

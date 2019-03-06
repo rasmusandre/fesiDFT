@@ -161,3 +161,42 @@ rerun: 3,
 first run: 16-20 (473-477)
 
 J. Fredrik Herberg, Christian Kolstad,
+
+1/3:
+
+27 new:
+
+done: 21,
+rerun: 25, 27
+
+27 v3:
+
+rerun: 4, 16, 11, 13
+done: 7,8,12,3
+change kpts, rerun: 14, 15, 17, 18, 19, 20
+
+4/3:
+
+27 new:
+
+still running: 25
+done: 27
+
+27 v3:
+
+done: 4, 14, 15, 17, 20
+change kpts: 16, 13
+still running: 18
+rerun: 11
+
+6/3:
+
+27 new:
+
+rerun: 25
+
+27 v3:
+
+rerun: 11, 18, 13
+
+first run: 21-27 (032-038)
