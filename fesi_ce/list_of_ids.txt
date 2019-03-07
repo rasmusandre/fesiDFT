@@ -200,3 +200,21 @@ rerun: 25
 rerun: 11, 18, 13
 
 first run: 21-27 (032-038)
+
+7/3:
+
+27 v3:
+
+change kpts and rerun: 21, 24, 25, 27 (566-569)
+crash: 22
+rerun: 11
+still running: 23, 26
+done: 18, 13
+
+27 new:
+
+still running: 
+rerun: 25
+
+nice -19 python nameofscript.py
+ssh rasmusat@login.phys.ntnu.no -> skriv navn på gauss, igor osv...

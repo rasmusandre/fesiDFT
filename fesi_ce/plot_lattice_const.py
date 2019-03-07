@@ -287,7 +287,7 @@ def plot_formation_energy():
 
     x,y = (list(t) for t in zip(*sorted(zip(x, y))))
 
-    ev = ret_evaluator(-0.05)
+    ev = ret_evaluator_bcs(-0.05)
     en_pred = ev.cf_matrix.dot(ev.eci)
     conc_pred = ev.concs
     form_conc_pred = []
@@ -299,14 +299,16 @@ def plot_formation_energy():
 
         if 'Si' in conc_pred[j] and 'Fe' in conc_pred[j]:
 
-            form_en_pred.append(en_pred[j]-conc_pred[j]['Si']*en_pred[0]-conc_pred[j]['Fe']*en_pred[-1])
+            #form_en_pred.append(en_pred[j]-conc_pred[j]['Si']*en_pred[-1]-conc_pred[j]['Fe']*en_pred[-1])
+            form_en_pred.append(en_pred[j] - conc_pred[j]['Si']*si_ene - conc_pred[j]['Fe']*fe_ene)
             form_conc_pred.append([conc_pred[j]['Si']])
 
-    form_conc_pred.append([1])
-    form_en_pred.append(0)
+    #form_conc_pred.append([1])
+    #form_en_pred.append(0)
     form_conc_pred.append([0])
     form_en_pred.append(0)
-
+    #print((en_pred))
+    #print(conc_pred)
 
     plt.figure(0)
     plt.plot(x, y, 'r--', lw=2)

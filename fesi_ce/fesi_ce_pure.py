@@ -18,7 +18,7 @@ def main():
     struct_generator = NewStructures(ceBulk, struct_per_gen=10)
     #print(ceBulk.basis_functions)
     #reconfigure(ceBulk)
-    evaluator = evaluate_GA(ceBulk)
+    evaluator = evaluate(ceBulk)
 
 
 def reconfigure(ceBulk):
@@ -31,12 +31,12 @@ def reconfigure(ceBulk):
 def evaluate(ceBulk):
 
     from ase.clease import Evaluate, BayesianCompressiveSensing
-    compressive = BayesianCompressiveSensing(noise=0.01)#, variance_opt_start=0.01, lamb_opt_start=0.01)
+    compressive = BayesianCompressiveSensing(noise=0.008)#, variance_opt_start=0.01, lamb_opt_start=0.01)
 
     scond = [('converged','=',1), ('c1_0', '>', -0.05)]#, ('group','<',4)]#, ('id', '!=', 39), ('id', '!=', 40)]
 
     evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False, alpha=1.29*1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=8, max_cluster_size=7, select_cond=scond)
+    scoring_scheme="loocv_fast", max_cluster_dia=4.8, max_cluster_size=4, select_cond=scond)
 
 
     #evaluator.plot_CV()
@@ -49,10 +49,8 @@ def evaluate(ceBulk):
         json.dump(eci_names, outfile, indent=2, separators=(",",":"))
 
     """
-    Hvordan er clusterene definert?
     I BCS, er det variance_opt_start og lamb_opt_start som skal sjekkes?
     Forslag til hva jeg kan trekke inn i oppgaven ang. clusters? Slik Olve gjorde med største ECI
-    Hvordan printe configuration variabel (sigma +- 1)
     Hvordan få CE predikert energi fra klassen?
     Convex hull, hvorfor er ikke formation energy = 0 for X(Si) = 1?
     """
@@ -79,10 +77,10 @@ def evaluate_GA(ceBulk):
     names = [x.strip() for x in lines]
 
     from ase.clease import BayesianCompressiveSensing
-    compressive = BayesianCompressiveSensing(noise=0.005)
+    compressive = BayesianCompressiveSensing(noise=0.0005)
 
     evaluator = Evaluate(ceBulk, cluster_names=names, fitting_scheme=compressive, parallel=False, alpha=1.3*1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=8, max_cluster_size=8, select_cond=scond)
+    scoring_scheme="loocv_fast", max_cluster_dia=8, max_cluster_size=7, select_cond=scond)
 
     #evaluator.plot_CV()
 

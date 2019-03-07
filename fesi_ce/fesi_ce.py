@@ -83,12 +83,12 @@ def ret_evaluator_bcs(c1_0):
     from ase.clease import Evaluate
 
     from ase.clease import BayesianCompressiveSensing
-    compressive = BayesianCompressiveSensing(noise=0.05)
+    compressive = BayesianCompressiveSensing(noise=0.008)
 
     scond = [('converged','=',1), ('c1_0', '>', c1_0)]#, ('id','!=',15), ('id', '!=',16)]#, ('group','<',4), ('id','!=',15), ('id', '!=',16)] #(group, =, 0)
 
     evaluator = Evaluate(ceBulk, fitting_scheme=compressive, parallel=False, alpha=1.29*1E-4,
-    scoring_scheme="loocv_fast", max_cluster_dia=6, max_cluster_size=5, select_cond=scond)#, select_cond=scond)
+    scoring_scheme="loocv_fast", max_cluster_dia=8, max_cluster_size=7, select_cond=scond)#, select_cond=scond)
     #evaluator.plot_fit()
     eci_names = evaluator.get_cluster_name_eci(return_type="dict")
     eci_fname = 'my_file_eci.json'
@@ -343,6 +343,7 @@ def find_duplicates():
     for j, id in enumerate(ids,1):
 
         atm1 = db.get_atoms(id=id)
+        #print id being checked
         print(id)
         for id2 in ids[j:]:
 
