@@ -213,8 +213,20 @@ done: 18, 13
 
 27 new:
 
-still running: 
+still running:
 rerun: 25
 
 nice -19 python nameofscript.py
 ssh rasmusat@login.phys.ntnu.no -> skriv navn på gauss, igor osv...
+
+8/3:
+
+27 new:
+
+still running: 25
+
+27 v3:
+
+still running: 24
+done: 21, 25, 27
+not done: 11
