@@ -43,7 +43,7 @@ def plot_energies():
 def run_job():
     from fesi_mc import simulated_ann
 
-    concs = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5]
+    concs = [0.65, 0.6, 0.55, 0.5]#[0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5]
 
     size = [8,8,8]
     temps = [4000, 3000, 2500, 2000, 1500, 1000, 750, 500, 250, 200, 150, 100]
@@ -62,5 +62,5 @@ def run_job():
 
 if __name__ == '__main__':
 
-    plot_energies()
-    #run_job()
+    #plot_energies()
+    run_job()
