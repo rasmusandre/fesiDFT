@@ -137,6 +137,6 @@ def plot_heat_capacity_vs_t():
 
 if __name__ == '__main__':
 
-    plot_energies()
+    #plot_energies()
     #plot_heat_capacity()
-    #plot_heat_capacity_vs_t()
+    plot_heat_capacity_vs_t()
